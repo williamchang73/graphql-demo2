@@ -48,7 +48,10 @@ const Attack = Conn.define('attack',{
         type : Sequelize.INTEGER,
         allowNull : false
     },
-    vce : {
+    cve : {
+        type : Sequelize.INTEGER
+    },
+    cveUrl : {
         type : Sequelize.STRING
     },
     category : {
@@ -70,32 +73,33 @@ const Event = Conn.define('event', {
 Device.belongsToMany(Attack, {through: 'event'});
 Attack.belongsToMany(Device, {through: 'event'});
 
-Conn.sync({ force:false });
-// Conn.sync({ force:true }).then(()=>{
-//     _.times(10, ()=>{
-//         Device.create({
-//             name : Faker.name.firstName(),
-//             ip : Faker.internet.ip(),
-//             isOnline : true,
-//             type : Faker.random.number(10),
-//             brand : Faker.name.firstName(),
-//             model : Faker.name.lastName()
-//         }).then(device => {
-//             Attack.create({
-//                 name : Faker.name.title() + ' Attack',
-//                 severity : Faker.random.number(5),
-//                 vce : Faker.internet.url(),
-//                 category : Faker.random.number(10)
-//             }).then(
-//                 attack => {
-//                     device.addAttack(attack,{
-//                         action : Faker.random.number(3)
-//                     });
-//                 }
-//             );
-//         });
-//     });
-// });
+// Conn.sync({ force:false });
+Conn.sync({ force:true }).then(()=>{
+    _.times(10, ()=>{
+        Device.create({
+            name : Faker.name.firstName(),
+            ip : Faker.internet.ip(),
+            isOnline : true,
+            type : Faker.random.number({min : 1, max : 10}),
+            brand : Faker.name.firstName(),
+            model : Faker.name.lastName()
+        }).then(device => {
+            Attack.create({
+                name : Faker.name.title() + ' Attack',
+                severity : Faker.random.number({min : 1, max : 5}),
+                cve : Faker.random.number({min : 1, max : 7}),
+                cveUrl : Faker.internet.url(),
+                category : Faker.random.number({min : 1, max : 10})
+            }).then(
+                attack => {
+                    device.addAttack(attack,{
+                        action : Faker.random.number(3)
+                    });
+                }
+            );
+        });
+    });
+});
 
 
 

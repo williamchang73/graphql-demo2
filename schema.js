@@ -8,6 +8,7 @@ import {
 } from 'graphql';
 
 import Db from './db';
+import RP from 'request-promise';
 
 
 const Attack = new GraphQLObjectType({
@@ -27,16 +28,40 @@ const Attack = new GraphQLObjectType({
                     return attack.severity;
                 }
             },
-            vce : {
+            cve : {
+                type : GraphQLInt,
+                resolve (attack) {
+                    return attack.cve;
+                } 
+            },
+            cveUrl : {
                 type : GraphQLString,
                 resolve (attack) {
-                    return attack.vce;
+                    return attack.cveUrl;
                 } 
             },
             category : {
                 type : GraphQLInt,
                 resolve (attack) {
                     return attack.category;
+                }
+            },
+            information : {
+                type : GraphQLString,
+                resolve (attack){
+                    //get from document server
+                    var url = 'http://swapi.co/api/films/'+attack.cve+'/';
+                    return new RP(url)
+                    .then(function (body) {
+                        // Process html...
+                        var result = JSON.parse(body);
+                        return result.title;
+                    })
+                    .catch(function (err) {
+                        // Crawling failed...
+                        console.debug(err);
+                        return '';
+                    });
                 }
             }
         };
@@ -89,6 +114,12 @@ const Device = new GraphQLObjectType({
         resolve (device) {
           return device.model;
         }
+      },
+      event: {
+          type: new GraphQLList(Event),
+          resolve (device){
+              return Db.models.event.findAll({ where: {deviceId : device.id} });
+          }
       }
     };
   }
@@ -136,6 +167,17 @@ const Query = new GraphQLObjectType({
             },
             resolve (root, args) {
                 return Db.models.event.findAll({ where: args });
+            }
+        },
+        device:{
+            type : new GraphQLList(Device),
+            args:{
+                id : {
+                    type : GraphQLInt
+                }
+            },
+            resolve (root, args){
+                return Db.models.device.findAll({ where: args });
             }
         }
     };
