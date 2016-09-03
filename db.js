@@ -70,51 +70,33 @@ const Event = Conn.define('event', {
 Device.belongsToMany(Attack, {through: 'event'});
 Attack.belongsToMany(Device, {through: 'event'});
 
-Conn.sync({ force:true }).then(()=>{
-    _.times(10, ()=>{
-        Device.create({
-            name : Faker.name.firstName(),
-            ip : Faker.internet.ip(),
-            isOnline : true,
-            type : Faker.random.number(10),
-            brand : Faker.name.firstName(),
-            model : Faker.name.lastName()
-        }).then(device => {
-            Attack.create({
-                name : Faker.name.title() + ' Attack',
-                severity : Faker.random.number(5),
-                vce : Faker.internet.url(),
-                category : Faker.random.number(10)
-            }).then(
-                attack => {
-                    device.addAttack(attack,{
-                        action : Faker.random.number(3)
-                    });
-                }
-            );
-        });
-    });
-});
-
-// .then(()=> {
+Conn.sync({ force:false });
+// Conn.sync({ force:true }).then(()=>{
 //     _.times(10, ()=>{
-//        return Member.create({
-//            name: Faker.name.firstName(),
-//            avatar: Faker.image.imageUrl(),
-//            wtp: Faker.random.number(2)
-//        }).then(
-//            member=> {
-//                return member.createDevice({
-//                    ip: Faker.internet.ip(),
-//                    type: Faker.random.number(10),
-//                    isOnline: true,
-//                    brand: Faker.name.firstName(),
-//                    model: Faker.name.lastName()
-//                });
-//            }
-//        );
+//         Device.create({
+//             name : Faker.name.firstName(),
+//             ip : Faker.internet.ip(),
+//             isOnline : true,
+//             type : Faker.random.number(10),
+//             brand : Faker.name.firstName(),
+//             model : Faker.name.lastName()
+//         }).then(device => {
+//             Attack.create({
+//                 name : Faker.name.title() + ' Attack',
+//                 severity : Faker.random.number(5),
+//                 vce : Faker.internet.url(),
+//                 category : Faker.random.number(10)
+//             }).then(
+//                 attack => {
+//                     device.addAttack(attack,{
+//                         action : Faker.random.number(3)
+//                     });
+//                 }
+//             );
+//         });
 //     });
 // });
+
 
 
 
