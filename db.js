@@ -13,26 +13,10 @@ const Conn = new Sequelize(
     }
 );
 
-//member
-const Member = Conn.define('member',{
-    name : {
-        type : Sequelize.STRING,
-        allowNull : false
-    },
-    avatar : {
-        type : Sequelize.STRING,
-        allowNull : false
-    },
-    wtp : {
-        type : Sequelize.INTEGER,
-        allowNull : false
-    }
-});
-
 //device
 const Device = Conn.define('device',{
-    type : {
-        type : Sequelize.INTEGER
+    name : {
+        type : Sequelize.STRING
     },
     ip : {
         type : Sequelize.STRING,
@@ -42,6 +26,9 @@ const Device = Conn.define('device',{
         type : Sequelize.BOOLEAN,
         allowNull : false
     },
+    type : {
+        type : Sequelize.INTEGER
+    },
     brand : {
         type : Sequelize.STRING
     },
@@ -50,31 +37,84 @@ const Device = Conn.define('device',{
     }
 });
 
-Member.hasMany(Device);
-Device.belongsTo(Member);
+
+//attack
+const Attack = Conn.define('attack',{
+    name : {
+        type : Sequelize.STRING,
+        allowNull : false        
+    },
+    severity : {
+        type : Sequelize.INTEGER,
+        allowNull : false
+    },
+    vce : {
+        type : Sequelize.STRING
+    },
+    category : {
+        type : Sequelize.INTEGER,
+        allowNull : false
+    }
+});
 
 
-// generate some data
-// add some information
-Conn.sync({ force:true }).then(()=> {
+
+const Event = Conn.define('event', {
+    action : {
+        type : Sequelize.INTEGER
+    }
+});
+
+
+
+Device.belongsToMany(Attack, {through: 'event'});
+Attack.belongsToMany(Device, {through: 'event'});
+
+Conn.sync({ force:true }).then(()=>{
     _.times(10, ()=>{
-       return Member.create({
-           name: Faker.name.firstName(),
-           avatar: Faker.image.imageUrl(),
-           wtp: Faker.random.number(2)
-       }).then(
-           member=> {
-               return member.createDevice({
-                   ip: Faker.internet.ip(),
-                   type: Faker.random.number(10),
-                   isOnline: true,
-                   brand: Faker.name.firstName(),
-                   model: Faker.name.lastName()
-               });
-           }
-       );
+        Device.create({
+            name : Faker.name.firstName(),
+            ip : Faker.internet.ip(),
+            isOnline : true,
+            type : Faker.random.number(10),
+            brand : Faker.name.firstName(),
+            model : Faker.name.lastName()
+        }).then(device => {
+            Attack.create({
+                name : Faker.name.title() + ' Attack',
+                severity : Faker.random.number(5),
+                vce : Faker.internet.url(),
+                category : Faker.random.number(10)
+            }).then(
+                attack => {
+                    device.addAttack(attack,{
+                        action : Faker.random.number(3)
+                    });
+                }
+            );
+        });
     });
 });
+
+// .then(()=> {
+//     _.times(10, ()=>{
+//        return Member.create({
+//            name: Faker.name.firstName(),
+//            avatar: Faker.image.imageUrl(),
+//            wtp: Faker.random.number(2)
+//        }).then(
+//            member=> {
+//                return member.createDevice({
+//                    ip: Faker.internet.ip(),
+//                    type: Faker.random.number(10),
+//                    isOnline: true,
+//                    brand: Faker.name.firstName(),
+//                    model: Faker.name.lastName()
+//                });
+//            }
+//        );
+//     });
+// });
 
 
 
